@@ -76,8 +76,10 @@ Node.js for you when it is run with the necessary privileges. Non-interactive
 usage:
 
 ```powershell
-scripts\install.ps1 -UseHost     # or -UseDocker
-bash scripts/install.sh --host # or --docker
+scripts\install.ps1 -UseHost        # or -UseDocker
+scripts\install.ps1 -Update -UseHost # pull latest and reinstall
+bash scripts/install.sh --host       # or --docker
+bash scripts/install.sh --update --host # pull latest and reinstall
 ```
 
 Then start the web dev server in a second terminal:

@@ -14,11 +14,13 @@
       .\scripts\install.ps1 -UseDocker    # Docker Compose setup
       .\scripts\install.ps1 -UseHost      # Host development setup
       .\scripts\install.ps1 -UseDocker -SkipBuild
+      .\scripts\install.ps1 -Update -UseHost
 #>
 param(
     [switch]$UseDocker,
     [switch]$UseHost,
     [switch]$SkipBuild,
+    [switch]$Update,
     [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot)
 )
 $ErrorActionPreference = 'Stop'
@@ -129,6 +131,15 @@ How would you like to run Zuzu?
         'D' { $useDocker = $true }
         default { $useHost = $true }
     }
+}
+
+if ($Update -and -not $useDocker -and -not $useHost) {
+    $useHost = $true
+}
+
+if ($Update) {
+    Write-Host "Pulling latest code..."
+    & git -C $ProjectRoot pull origin main
 }
 
 if ($useDocker) {

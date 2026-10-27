@@ -11,6 +11,7 @@
 #   bash scripts/install.sh --docker
 #   bash scripts/install.sh --host
 #   bash scripts/install.sh --docker --skip-build
+#   bash scripts/install.sh --update --host
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -19,16 +20,27 @@ cd "$PROJECT_ROOT"
 USE_DOCKER=false
 USE_HOST=false
 SKIP_BUILD=false
+UPDATE=false
 
 for arg in "$@"; do
     case "$arg" in
         --docker) USE_DOCKER=true ;;
         --host) USE_HOST=true ;;
         --skip-build) SKIP_BUILD=true ;;
+        --update) UPDATE=true ;;
+        --help)
+            echo "Usage: $0 [--host|--docker] [--skip-build] [--update]"
+            echo ""
+            echo "  --host        Install the host development environment."
+            echo "  --docker      Install the Docker Compose stack."
+            echo "  --skip-build  Skip Docker image build (Docker path only)."
+            echo "  --update      Pull the latest code before installing/updating."
+            exit 0
+            ;;
     esac
 done
 
-if [[ "$USE_DOCKER" == false && "$USE_HOST" == false ]]; then
+if [[ "$USE_DOCKER" == false && "$USE_HOST" == false && "$UPDATE" == false ]]; then
     echo ""
     echo "How would you like to run Zuzu?"
     echo ""
@@ -40,6 +52,11 @@ if [[ "$USE_DOCKER" == false && "$USE_HOST" == false ]]; then
         D) USE_DOCKER=true ;;
         *) USE_HOST=true ;;
     esac
+fi
+
+if [[ "$UPDATE" == true && "$USE_DOCKER" == false && "$USE_HOST" == false ]]; then
+    # Default update to host path if not specified.
+    USE_HOST=true
 fi
 
 install_prereqs() {
@@ -117,6 +134,12 @@ install_prereqs() {
         exit 1
     fi
 }
+
+if [[ "$UPDATE" == true ]]; then
+    echo "Pulling latest code..."
+    git config --global --add safe.directory "$PROJECT_ROOT" 2>/dev/null || true
+    git -C "$PROJECT_ROOT" pull origin main
+fi
 
 if [[ "$USE_DOCKER" == true ]]; then
     if ! command -v docker >/dev/null 2>&1; then
