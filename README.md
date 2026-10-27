@@ -15,6 +15,25 @@
 Zuzu is completely independent of OpenClaw, AstraAI and any other assistant —
 see `docs/ARCHITECTURE.md#independence-statement` and the independence tests.
 
+## System requirements
+
+- **Python** 3.12 or newer (used by the backend and setup scripts).
+- **Node.js** and **npm** (used to build and run the web frontend).
+- One of:
+  - **Windows** with PowerShell 5.1+,
+  - **Linux** or **macOS**, or
+  - **WSL2** on Windows.
+
+Optional, depending on the path you choose:
+
+- **Docker** and **Docker Compose** — only if you run the full
+  PostgreSQL-backed stack via `scripts/setup.ps1` / `scripts/setup.sh`.
+- **PostgreSQL** 16+ — only if you prefer a local Postgres database instead
+  of SQLite for host development. The default host setup uses SQLite, so no
+  external database is required.
+- **NVIDIA API key** — only if you switch from the mock provider to live
+  NVIDIA chat.
+
 ## Quick start (host, no Docker)
 
 The fastest way to run locally. Uses SQLite and the mock AI provider, so no
