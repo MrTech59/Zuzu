@@ -84,8 +84,13 @@ Then start the web dev server in a second terminal:
 
 ```powershell
 cd apps\web
-npm run dev                     # http://localhost:3000
+npm run dev                     # reachable on all interfaces, e.g. http://<ip>:3000
 ```
+
+The host setup scripts automatically detect your machine's IP and write it
+into `.env` as `NEXT_PUBLIC_ZUZU_API_URL` and `ZUZU_CORS_ORIGINS`, so the web
+UI works from another device on the same network. The API and web dev servers
+both bind to `0.0.0.0` by default.
 
 The first-run wizard at `/setup` lets you confirm the API URL. In dev mode,
 authentication is optional unless `ZUZU_API_KEY` is set in `.env`.
@@ -97,11 +102,28 @@ If you prefer to run the underlying scripts directly:
 ```powershell
 # Host development (SQLite + mock provider)
 scripts\dev-setup.ps1
-scripts\dev.ps1
+scripts\dev.ps1                  # binds API to 0.0.0.0:8000
 
 # Docker Compose (PostgreSQL + NVIDIA live-chat ready)
 scripts\setup.ps1
 ```
+
+## Run as systemd services (Linux)
+
+To keep the API and web UI running persistently on a Linux host, install and
+start the provided systemd units:
+
+```bash
+bash scripts/install-services.sh   # requires root/sudo
+```
+
+This builds the web production bundle, installs `zuzu-api.service` and
+`zuzu-web.service`, enables them, and starts them. The API binds to
+`0.0.0.0:8000` and the web UI to `0.0.0.0:3000`, so both are reachable by IP
+from the local network.
+
+Use `systemctl status zuzu-api` / `systemctl status zuzu-web` and
+`journalctl -u zuzu-api -f` / `journalctl -u zuzu-web -f` to manage them.
 
 `compose.yaml` loads environment variables directly from `.env` so secrets
 are not subject to Docker Compose interpolation. The setup scripts rewrite

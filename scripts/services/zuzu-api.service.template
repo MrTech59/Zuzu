@@ -1,0 +1,16 @@
+[Unit]
+Description=Zuzu API server
+After=network.target
+
+[Service]
+Type=simple
+User={{USER}}
+Group={{USER}}
+WorkingDirectory={{REPO_PATH}}
+EnvironmentFile={{REPO_PATH}}/.env
+ExecStart={{PYTHON}} -m uvicorn zuzu.main:app --host 0.0.0.0 --port 8000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

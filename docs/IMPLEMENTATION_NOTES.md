@@ -163,8 +163,18 @@ and unverified facts. Updated at each stage.
   `NEXT_PUBLIC_ZUZU_API_URL=http://127.0.0.1:8000/api/v1`.
 - Added `scripts/dev-setup.ps1` / `scripts/dev-setup.sh` to install Python
   and Node dependencies and create a ready-to-use `.env`.
+  The host setup scripts detect the machine's primary IPv4 address and set
+  `NEXT_PUBLIC_ZUZU_API_URL` and `ZUZU_CORS_ORIGINS` accordingly, so the web
+  UI is reachable from another device on the same network.
 - Added `scripts/dev.sh` alongside the existing `scripts/dev.ps1` to start
-  the API on Linux/macOS/WSL.
+  the API on Linux/macOS/WSL. Both dev scripts now bind to `0.0.0.0:8000`
+  by default and accept a `--host` / `-Host` override.
+- `apps/web/package.json` now binds `next dev` and `next start` to
+  `0.0.0.0`, making the web UI reachable by IP.
+- Added `scripts/services/zuzu-api.service.template`,
+  `scripts/services/zuzu-web.service.template`, and
+  `scripts/install-services.sh` to install the API and web UI as systemd
+  services on Linux.
 - Docker Compose remains a first-class alternative: `scripts/setup.ps1` and
   `scripts/setup.sh` rewrite `.env` to use PostgreSQL (`@db:5432`) and
   `AI_PROVIDER=nvidia` when generating the production-like stack.

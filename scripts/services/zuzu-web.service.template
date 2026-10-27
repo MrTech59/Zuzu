@@ -1,0 +1,17 @@
+[Unit]
+Description=Zuzu web UI
+After=network.target zuzu-api.service
+Wants=zuzu-api.service
+
+[Service]
+Type=simple
+User={{USER}}
+Group={{USER}}
+WorkingDirectory={{REPO_PATH}}/apps/web
+EnvironmentFile={{REPO_PATH}}/.env
+ExecStart={{NPM}} run start
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

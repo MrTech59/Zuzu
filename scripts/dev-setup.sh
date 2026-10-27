@@ -62,8 +62,13 @@ fi
 
 if [[ "$GENERATE" == true ]]; then
     API_KEY=$("$PYTHON" -c 'import secrets; print(secrets.token_urlsafe(32))')
+    # Pick the first non-loopback IPv4 address so the web UI can reach the API
+    # from another machine on the same network.
+    HOST_IP="$(hostname -I 2>/dev/null | awk '{print $1}')"
+    HOST_IP="${HOST_IP:-127.0.0.1}"
     sed \
         -e "s/^ZUZU_API_KEY=.*/ZUZU_API_KEY=${API_KEY}/" \
+        -e "s|^NEXT_PUBLIC_ZUZU_API_URL=.*|NEXT_PUBLIC_ZUZU_API_URL=http://${HOST_IP}:8000/api/v1|" \
         "$EXAMPLE_FILE" > "$ENV_FILE"
     echo ".env created with generated secrets (SQLite + mock provider by default)."
 fi
@@ -73,6 +78,18 @@ sed -i.bak -e 's/\r$//' "$ENV_FILE" && rm -f "$ENV_FILE.bak"
 
 # Ensure a single trailing newline.
 printf '\n' >> "$ENV_FILE"
+
+# If we generated a fresh .env, also allow the web UI origin for CORS.
+if [[ "$GENERATE" == true ]]; then
+    HOST_IP="$(hostname -I 2>/dev/null | awk '{print $1}')"
+    HOST_IP="${HOST_IP:-127.0.0.1}"
+    CORS="http://localhost:3000,http://127.0.0.1:3000,http://${HOST_IP}:3000"
+    if grep -q '^ZUZU_CORS_ORIGINS=' "$ENV_FILE"; then
+        sed -i.bak -e "s|^ZUZU_CORS_ORIGINS=.*|ZUZU_CORS_ORIGINS=${CORS}|" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
+    else
+        echo "ZUZU_CORS_ORIGINS=${CORS}" >> "$ENV_FILE"
+    fi
+fi
 
 if grep -q '@db:5432' "$ENV_FILE" 2>/dev/null; then
     echo "WARNING: DATABASE_URL still points to the Docker hostname (@db:5432)." >&2
@@ -85,7 +102,10 @@ echo 'Installing Python dependencies...'
 echo 'Installing Node dependencies...'
 (cd "$PROJECT_ROOT/apps/web" && npm install)
 
-cat <<'EOF'
+HOST_IP="$(hostname -I 2>/dev/null | awk '{print $1}')"
+HOST_IP="${HOST_IP:-127.0.0.1}"
+
+cat <<EOF
 
 Setup complete. Next steps:
 
@@ -96,8 +116,8 @@ Setup complete. Next steps:
      cd apps/web
      npm run dev
 
-Web UI: http://localhost:3000
-API:    http://127.0.0.1:8000/api/v1/health
+Web UI: http://${HOST_IP}:3000
+API:    http://${HOST_IP}:8000/api/v1/health
 
 To use live NVIDIA chat instead of the mock provider, set AI_PROVIDER=nvidia
 and NVIDIA_API_KEY in .env, then restart the API. For a full Docker Compose
