@@ -1,0 +1,106 @@
+# Zuzu agent profiles.
+#
+# Profiles express intent and coarse constraints. They are NOT a security
+# boundary: the backend policy engine (zuzu.policy.engine) enforces all
+# decisions regardless of what an agent profile or prompt claims.
+
+agents:
+  researcher:
+    description: >-
+      Conducts approved research, gathers information and produces
+      evidence-based summaries. Read-only; may use the shared browser
+      MCP tools for reading and navigation within policy.
+    allowed_tools:
+      - browser_current
+      - browser_read
+      - browser_read_chunk
+      - browser_tabs
+      - browser_find
+      - browser_links
+      - browser_links_all
+      - browser_extract_links
+      - browser_get_attribute
+      - browser_wait
+      - browser_wait_for
+      - browser_navigate   # navigation itself requires approval (policy)
+      - browser_new_tab    # requires approval (policy)
+    denied_tools:
+      - browser_click
+      - browser_type
+      - browser_press
+      - browser_select
+      - browser_download
+      - browser_screenshot
+    allowed_action_kinds:
+      - mcp_tool
+    workspace_paths: []
+    max_steps: 12
+    timeout_seconds: 600
+    requires_approval_for: []
+    output_format: markdown
+
+  developer:
+    description: >-
+      Works on files within explicitly authorized project workspaces only.
+      All writes require approval; reads inside authorized workspaces are
+      allowed automatically.
+    allowed_tools: []      # v0.1.0 file tools are policy-driven, no MCP
+    denied_tools:
+      - browser_click
+      - browser_type
+      - browser_download
+    allowed_action_kinds:
+      - file_read
+      - file_write
+    workspace_paths:
+      - "G:/Dev/ZUZU/workspaces/**"
+    max_steps: 20
+    timeout_seconds: 900
+    requires_approval_for:
+      - file_write
+    output_format: markdown
+
+  tester:
+    description: >-
+      Runs permitted tests, linting, type checks and verification within
+      authorized workspaces. Reports failures honestly; never marks a
+      failing check as passed.
+    allowed_tools: []
+    denied_tools:
+      - browser_click
+      - browser_type
+      - browser_download
+    allowed_action_kinds:
+      - file_read
+      - shell_exec          # only for allowlisted test/lint commands (policy)
+    workspace_paths:
+      - "G:/Dev/ZUZU/workspaces/**"
+    max_steps: 20
+    timeout_seconds: 900
+    requires_approval_for:
+      - shell_exec
+    output_format: markdown
+
+  homelab-observer:
+    description: >-
+      Performs approved read-only diagnostics through explicitly configured
+      tools. Never administers infrastructure; restarts and changes always
+      require explicit approval and are denied by default policy.
+    allowed_tools:
+      - browser_current
+      - browser_read
+      - browser_tabs
+    denied_tools:
+      - browser_click
+      - browser_type
+      - browser_press
+      - browser_select
+      - browser_download
+      - browser_new_tab
+    allowed_action_kinds:
+      - mcp_tool
+    workspace_paths: []
+    max_steps: 8
+    timeout_seconds: 300
+    requires_approval_for: []
+    output_format: markdown

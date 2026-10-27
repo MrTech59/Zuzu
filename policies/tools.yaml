@@ -1,0 +1,153 @@
+# Zuzu tool policy — default deny.
+#
+# Rules are evaluated top-down; the first match wins. Every action not
+# explicitly allowed here is denied by the policy engine in backend code.
+#
+# Fields:
+#   when.kind      : action category ("mcp_tool", "file_write", "service_restart", ...)
+#   when.tool      : fnmatch pattern against the tool name (optional)
+#   when.resource  : fnmatch pattern against the resource/target (optional)
+#   decision       : allow | deny | approval_required
+#   reason         : human-readable explanation surfaced in approvals/audit
+
+rules:
+  # --- Internal composition steps ---------------------------------------------
+  # A "respond" step only composes text via the AI provider; it performs no
+  # external action, so it is always allowed.
+  - when: {kind: respond}
+    decision: allow
+    reason: "Answer composition is internal and performs no external action."
+
+  # --- MCP browser tools -----------------------------------------------------
+  # Read-only browser operations may run automatically.
+  - when: {kind: mcp_tool, tool: "browser_current"}
+    decision: allow
+    reason: "Read-only browser status check."
+
+  - when: {kind: mcp_tool, tool: "browser_read"}
+    decision: allow
+    reason: "Read-only page text extraction."
+
+  - when: {kind: mcp_tool, tool: "browser_tabs"}
+    decision: allow
+    reason: "Read-only tab listing."
+
+  - when: {kind: mcp_tool, tool: "browser_find"}
+    decision: allow
+    reason: "Read-only element search."
+
+  - when: {kind: mcp_tool, tool: "browser_links"}
+    decision: allow
+    reason: "Read-only link listing."
+
+  - when: {kind: mcp_tool, tool: "browser_links_all"}
+    decision: allow
+    reason: "Read-only link listing (all)."
+
+  - when: {kind: mcp_tool, tool: "browser_extract_links"}
+    decision: allow
+    reason: "Read-only link extraction."
+
+  - when: {kind: mcp_tool, tool: "browser_get_attribute"}
+    decision: allow
+    reason: "Read-only attribute inspection."
+
+  - when: {kind: mcp_tool, tool: "browser_read_chunk"}
+    decision: allow
+    reason: "Read-only chunked page reading."
+
+  # Navigation opens new pages in the shared browser: allowed but audited.
+  # It does NOT alter files, accounts or services, but it changes the browser
+  # session, so it requires explicit approval for now (conservative default).
+  - when: {kind: mcp_tool, tool: "browser_navigate"}
+    decision: approval_required
+    reason: "Navigation changes the browser session state; requires approval."
+
+  - when: {kind: mcp_tool, tool: "browser_new_tab"}
+    decision: approval_required
+    reason: "Opening tabs changes the browser session; requires approval."
+
+  - when: {kind: mcp_tool, tool: "browser_switch_tab"}
+    decision: approval_required
+    reason: "Switching tabs changes browser focus; requires approval."
+
+  - when: {kind: mcp_tool, tool: "browser_back"}
+    decision: approval_required
+    reason: "Going back changes page state; requires approval."
+
+  # Interaction tools act on external pages with side effects: approval needed.
+  - when: {kind: mcp_tool, tool: "browser_click"}
+    decision: approval_required
+    reason: "Clicking may submit forms or trigger actions; requires approval."
+
+  - when: {kind: mcp_tool, tool: "browser_type"}
+    decision: approval_required
+    reason: "Typing may enter credentials or content; requires approval."
+
+  - when: {kind: mcp_tool, tool: "browser_press"}
+    decision: approval_required
+    reason: "Key presses may trigger actions; requires approval."
+
+  - when: {kind: mcp_tool, tool: "browser_select"}
+    decision: approval_required
+    reason: "Selecting options changes page state; requires approval."
+
+  - when: {kind: mcp_tool, tool: "browser_scroll"}
+    decision: approval_required
+    reason: "Scrolling changes browser state; requires approval."
+
+  - when: {kind: mcp_tool, tool: "browser_wait"}
+    decision: allow
+    reason: "Read-only waiting."
+
+  - when: {kind: mcp_tool, tool: "browser_wait_for"}
+    decision: allow
+    reason: "Read-only waiting for an element."
+
+  - when: {kind: mcp_tool, tool: "browser_screenshot"}
+    decision: approval_required
+    reason: "Screenshots are saved on the tool server; requires approval."
+
+  - when: {kind: mcp_tool, tool: "browser_download"}
+    decision: approval_required
+    reason: "Downloads write files on the tool server; requires approval."
+
+  # --- File actions -----------------------------------------------------------
+  - when: {kind: file_write}
+    decision: approval_required
+    reason: "File writes are consequential; workspace-authorized writes require approval."
+
+  - when: {kind: file_read}
+    decision: allow
+    reason: "Read-only file access inside authorized workspaces."
+
+  # --- Infrastructure ----------------------------------------------------------
+  - when: {kind: service_restart}
+    decision: approval_required
+    reason: "Service restarts affect availability."
+
+  - when: {kind: shell_exec}
+    decision: approval_required
+    reason: "Shell execution is consequential."
+
+  - when: {kind: network_change}
+    decision: deny
+    reason: "Network configuration changes are denied in v0.1.0."
+
+  - when: {kind: public_exposure}
+    decision: deny
+    reason: "Public service exposure is denied. Remote access is Tailscale-only."
+
+  - when: {kind: docker_socket_access}
+    decision: deny
+    reason: "The Docker socket is never exposed to agent workers."
+
+  - when: {kind: destructive_storage}
+    decision: deny
+    reason: "Destructive storage operations are denied in v0.1.0."
+
+  - when: {kind: host_admin}
+    decision: deny
+    reason: "Unrestricted host/admin access is denied in v0.1.0."
+
+# Everything else: denied by the engine's default.

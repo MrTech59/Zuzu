@@ -1,0 +1,620 @@
+[
+  {
+    "name": "browser_navigate",
+    "description": "Navigate the current browser tab to a URL.",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "browser_navigateArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_navigateOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_read",
+    "description": "Read visible text from the current webpage.",
+    "inputSchema": {
+      "properties": {},
+      "title": "browser_readArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_readOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_click",
+    "description": "Click an element using a CSS selector.",
+    "inputSchema": {
+      "properties": {
+        "selector": {
+          "title": "Selector",
+          "type": "string"
+        }
+      },
+      "required": [
+        "selector"
+      ],
+      "title": "browser_clickArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_clickOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_type",
+    "description": "Enter text into an input using a CSS selector.",
+    "inputSchema": {
+      "properties": {
+        "selector": {
+          "title": "Selector",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "selector",
+        "text"
+      ],
+      "title": "browser_typeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_typeOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_wait",
+    "description": "Wait for dynamic webpage content.",
+    "inputSchema": {
+      "properties": {
+        "seconds": {
+          "default": 2,
+          "title": "Seconds",
+          "type": "number"
+        }
+      },
+      "title": "browser_waitArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_waitOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_back",
+    "description": "Go back one page.",
+    "inputSchema": {
+      "properties": {},
+      "title": "browser_backArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_backOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_current",
+    "description": "Return the current page title and URL.",
+    "inputSchema": {
+      "properties": {},
+      "title": "browser_currentArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_currentOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_screenshot",
+    "description": "Take a full-page screenshot and save it on the browser server.",
+    "inputSchema": {
+      "properties": {},
+      "title": "browser_screenshotArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_screenshotOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_find",
+    "description": "Find visible elements containing the specified text.",
+    "inputSchema": {
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "browser_findArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_findOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_press",
+    "description": "Press a keyboard key.",
+    "inputSchema": {
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "browser_pressArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_pressOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_tabs",
+    "description": "List all open browser tabs.",
+    "inputSchema": {
+      "properties": {},
+      "title": "browser_tabsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_tabsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_new_tab",
+    "description": "Open a new browser tab.",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "default": "about:blank",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "title": "browser_new_tabArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_new_tabOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_switch_tab",
+    "description": "Switch to an existing browser tab by index.",
+    "inputSchema": {
+      "properties": {
+        "index": {
+          "title": "Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "index"
+      ],
+      "title": "browser_switch_tabArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_switch_tabOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_links",
+    "description": "List links on the current webpage.",
+    "inputSchema": {
+      "properties": {},
+      "title": "browser_linksArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_linksOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_wait_for",
+    "description": "Wait until an element matching a CSS selector appears.",
+    "inputSchema": {
+      "properties": {
+        "selector": {
+          "title": "Selector",
+          "type": "string"
+        },
+        "timeout": {
+          "default": 10000,
+          "title": "Timeout",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "selector"
+      ],
+      "title": "browser_wait_forArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_wait_forOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_scroll",
+    "description": "Scroll the webpage up or down by a number of pixels.",
+    "inputSchema": {
+      "properties": {
+        "direction": {
+          "default": "down",
+          "title": "Direction",
+          "type": "string"
+        },
+        "amount": {
+          "default": 700,
+          "title": "Amount",
+          "type": "integer"
+        }
+      },
+      "title": "browser_scrollArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_scrollOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_select",
+    "description": "Select an option from a HTML select element.",
+    "inputSchema": {
+      "properties": {
+        "selector": {
+          "title": "Selector",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "selector",
+        "value"
+      ],
+      "title": "browser_selectArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_selectOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_get_attribute",
+    "description": "Get an HTML attribute from an element.",
+    "inputSchema": {
+      "properties": {
+        "selector": {
+          "title": "Selector",
+          "type": "string"
+        },
+        "attribute": {
+          "title": "Attribute",
+          "type": "string"
+        }
+      },
+      "required": [
+        "selector",
+        "attribute"
+      ],
+      "title": "browser_get_attributeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_get_attributeOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_download",
+    "description": "\nClick a download link/button and save the\ndownloaded file to the browser server's\ncontrolled downloads directory.\n\nThe file is NOT allowed to choose an\narbitrary filesystem path.\n",
+    "inputSchema": {
+      "properties": {
+        "selector": {
+          "title": "Selector",
+          "type": "string"
+        }
+      },
+      "required": [
+        "selector"
+      ],
+      "title": "browser_downloadArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_downloadOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_links_all",
+    "description": "Return all links on the current webpage.",
+    "inputSchema": {
+      "properties": {},
+      "title": "browser_links_allArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_links_allOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_read_chunk",
+    "description": "Read visible page text in chunks.",
+    "inputSchema": {
+      "properties": {
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "length": {
+          "default": 20000,
+          "title": "Length",
+          "type": "integer"
+        }
+      },
+      "title": "browser_read_chunkArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_read_chunkOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "browser_extract_links",
+    "description": "Extract useful links with text and URLs.",
+    "inputSchema": {
+      "properties": {},
+      "title": "browser_extract_linksArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "browser_extract_linksOutput",
+      "type": "object"
+    }
+  }
+]

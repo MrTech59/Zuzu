@@ -1,0 +1,62 @@
+{
+  "endpoint": "http://192.168.3.137:8000/mcp",
+  "tool": "browser_navigate",
+  "handshake": "ok",
+  "server_info": {
+    "name": "picoclaw-browser",
+    "version": "1.30.0",
+    "protocol": "2025-11-25"
+  },
+  "tools": [
+    "browser_back",
+    "browser_click",
+    "browser_current",
+    "browser_download",
+    "browser_extract_links",
+    "browser_find",
+    "browser_get_attribute",
+    "browser_links",
+    "browser_links_all",
+    "browser_navigate",
+    "browser_new_tab",
+    "browser_press",
+    "browser_read",
+    "browser_read_chunk",
+    "browser_screenshot",
+    "browser_scroll",
+    "browser_select",
+    "browser_switch_tab",
+    "browser_tabs",
+    "browser_type",
+    "browser_wait",
+    "browser_wait_for"
+  ],
+  "input_schema": {
+    "properties": {
+      "url": {
+        "title": "Url",
+        "type": "string"
+      }
+    },
+    "required": [
+      "url"
+    ],
+    "title": "browser_navigateArguments",
+    "type": "object"
+  },
+  "arguments": {
+    "url": "http://example.com"
+  },
+  "schema_validation": "ok",
+  "policy_decision": "approval_required",
+  "policy_reason": "Navigation changes the browser session state; requires approval.",
+  "approval": "granted",
+  "call": {
+    "tool": "browser_navigate",
+    "result": "{'result': 'TITLE: Example Domain\\nURL: https://example.com/'}"
+  },
+  "state_check": {
+    "tool": "browser_current",
+    "result": "{'result': 'TITLE: Example Domain\\nURL: https://example.com/'}"
+  }
+}
