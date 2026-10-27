@@ -34,6 +34,25 @@ Optional, depending on the path you choose:
 - **NVIDIA API key** — only if you switch from the mock provider to live
   NVIDIA chat.
 
+### Hardware requirements
+
+Zuzu uses cloud AI providers, so no GPU is required locally.
+
+| Setup | Minimum RAM | Recommended RAM | Minimum free storage | Recommended free storage |
+|-------|-------------|-----------------|----------------------|--------------------------|
+| Host dev (SQLite, no Docker) | 2 GB | 4 GB | 2 GB | 4 GB |
+| Docker Compose stack (API + web + PostgreSQL) | 4 GB | 8 GB | 4 GB | 8 GB |
+
+Notes:
+- **RAM**: the Docker Compose stack runs three containers simultaneously
+  (API, Next.js web UI, PostgreSQL). Docker Desktop on Windows/WSL adds its
+  own memory overhead; 8 GB is much more comfortable.
+- **Storage**: most space is consumed by Docker images, `node_modules`, and
+  Python packages. The actual application data (SQLite/Postgres) starts at
+  only a few megabytes.
+- These numbers assume you are **not** running a local LLM. If you add local
+  inference later, GPU and RAM requirements are determined by that model.
+
 ## Quick start (host, no Docker)
 
 The fastest way to run locally. Uses SQLite and the mock AI provider, so no
