@@ -72,7 +72,12 @@ install_prereqs() {
 
     if [[ "$EUID" -ne 0 ]]; then
         echo "Re-run this script as root (or install Python 3.12 and Node.js yourself) to install them automatically." >&2
-        echo "Manual install: sudo apt install python3.12 python3-pip nodejs npm  # Debian/Ubuntu" >&2
+        echo "Ubuntu/Debian example:" >&2
+        echo "  sudo add-apt-repository ppa:deadsnakes/ppa" >&2
+        echo "  sudo apt update" >&2
+        echo "  sudo apt install python3.12 python3.12-venv python3.12-pip curl ca-certificates gnupg" >&2
+        echo "  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -" >&2
+        echo "  sudo apt install -y nodejs" >&2
         exit 1
     fi
 
@@ -80,7 +85,21 @@ install_prereqs() {
         echo "Installing Python 3.12 and Node.js via apt..." >&2
         export DEBIAN_FRONTEND=noninteractive
         apt-get update -qq
-        apt-get install -y -qq python3.12 python3.12-venv python3-pip curl ca-certificates gnupg
+        apt-get install -y -qq software-properties-common curl ca-certificates gnupg
+
+        if ! apt-cache show python3.12 >/dev/null 2>&1; then
+            if grep -qi '^ID=ubuntu' /etc/os-release 2>/dev/null; then
+                echo "Adding deadsnakes PPA for Python 3.12..." >&2
+                add-apt-repository -y ppa:deadsnakes/ppa
+                apt-get update -qq
+            else
+                echo "Python 3.12 is not available in this distro's default repositories." >&2
+                echo "Use a distro with Python 3.12 packages, or install Python 3.12 manually." >&2
+                exit 1
+            fi
+        fi
+
+        apt-get install -y -qq python3.12 python3.12-venv python3.12-pip
 
         NODE_MAJOR=22
         mkdir -p /etc/apt/keyrings
