@@ -46,18 +46,24 @@ if ($generate) {
     $pgPassword = & $python -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(32)))"
 
     $content = $example
+    $content = $content -replace '(?m)^AI_PROVIDER=.*$', "AI_PROVIDER=nvidia"
     $content = $content -replace '(?m)^ZUZU_API_KEY=.*$', "ZUZU_API_KEY=$apiKey"
     $content = $content -replace '(?m)^POSTGRES_PASSWORD=.*$', "POSTGRES_PASSWORD=$pgPassword"
-    # Keep DATABASE_URL password in sync with POSTGRES_PASSWORD.
-    $content = $content -replace '(?m)^(DATABASE_URL=postgresql\+psycopg://zuzu:)[^@]*(@db:5432/zuzu)$', "`${1}$pgPassword`${2}"
+    # Point DATABASE_URL at the Docker Compose database service.
+    $content = $content -replace '(?m)^DATABASE_URL=.*$', "DATABASE_URL=postgresql+psycopg://zuzu:$pgPassword@db:5432/zuzu"
     # Normalize to LF and ensure trailing newline.
     $content = ($content -replace "`r`n", "`n").TrimEnd() + "`n"
     $content | Set-Content -NoNewline -Path $envFile -Encoding UTF8
-    Write-Host '.env created with generated secrets.'
+    Write-Host '.env created with generated secrets (database host set to db).'
 } else {
     # Ensure .env uses LF line endings even if it was edited on Windows.
     $content = (Get-Content -Raw $envFile) -replace "`r`n", "`n"
     $content.TrimEnd() + "`n" | Set-Content -NoNewline -Path $envFile -Encoding UTF8
+    $content = Get-Content -Raw $envFile
+    if ($content -match '@127\.0\.0\.1:5432|sqlite') {
+        Write-Warning 'DATABASE_URL appears to point to a host database or SQLite.'
+        Write-Host "Run with -Force to regenerate a Docker Compose .env, or update DATABASE_URL manually." -ForegroundColor Yellow
+    }
 }
 
 if ($SkipBuild) {

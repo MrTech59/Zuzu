@@ -57,9 +57,10 @@ if [[ "$GENERATE" == true ]]; then
     API_KEY=$("$PYTHON" -c 'import secrets; print(secrets.token_urlsafe(32))')
     PG_PASSWORD=$("$PYTHON" -c 'import secrets, string; print("".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(32)))')
     sed \
+        -e "s/^AI_PROVIDER=.*/AI_PROVIDER=nvidia/" \
         -e "s/^ZUZU_API_KEY=.*/ZUZU_API_KEY=${API_KEY}/" \
         -e "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=${PG_PASSWORD}/" \
-        -e "s|^DATABASE_URL=postgresql+psycopg://zuzu:[^@]*@db:5432/zuzu|DATABASE_URL=postgresql+psycopg://zuzu:${PG_PASSWORD}@db:5432/zuzu|" \
+        -e "s|^DATABASE_URL=.*|DATABASE_URL=postgresql+psycopg://zuzu:${PG_PASSWORD}@db:5432/zuzu|" \
         "$EXAMPLE_FILE" > "$ENV_FILE"
 fi
 
@@ -69,8 +70,13 @@ sed -i.bak -e 's/\r$//' "$ENV_FILE" && rm -f "$ENV_FILE.bak"
 # Ensure a single trailing newline.
 printf '\n' >> "$ENV_FILE"
 
+if grep -Eq '@127\.0\.0\.1:5432|sqlite' "$ENV_FILE" 2>/dev/null; then
+    echo "WARNING: DATABASE_URL appears to point to a host database or SQLite." >&2
+    echo "Run with --force to regenerate a Docker Compose .env, or update DATABASE_URL manually." >&2
+fi
+
 if [[ "$GENERATE" == true ]]; then
-    echo ".env created with generated secrets."
+    echo ".env created with generated secrets (database host set to db)."
 fi
 
 if [[ "$SKIP_BUILD" == true ]]; then

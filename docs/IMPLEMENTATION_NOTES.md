@@ -155,6 +155,22 @@ and unverified facts. Updated at each stage.
 - The web service keeps an explicit `ZUZU_API_URL` override while also loading
   the rest of its environment from `.env`.
 
+### Host development path (no Docker by default)
+- Changed the default experience to host-based development using SQLite and
+  the mock AI provider, so no Docker or external database is required.
+- Updated `.env.example` to default to `AI_PROVIDER=mock`,
+  `DATABASE_URL=sqlite+aiosqlite:///./zuzu-dev.db`, and
+  `NEXT_PUBLIC_ZUZU_API_URL=http://127.0.0.1:8000/api/v1`.
+- Added `scripts/dev-setup.ps1` / `scripts/dev-setup.sh` to install Python
+  and Node dependencies and create a ready-to-use `.env`.
+- Added `scripts/dev.sh` alongside the existing `scripts/dev.ps1` to start
+  the API on Linux/macOS/WSL.
+- Docker Compose remains a first-class alternative: `scripts/setup.ps1` and
+  `scripts/setup.sh` rewrite `.env` to use PostgreSQL (`@db:5432`) and
+  `AI_PROVIDER=nvidia` when generating the production-like stack.
+- Verified host API starts with SQLite and the mock provider returns a
+  non-empty assistant response.
+
 ### Linux setup workflow verification
 - Ran `scripts/setup.sh --skip-build` inside WSL2 (Ubuntu) from a clean copy
   of the repository.
@@ -193,6 +209,9 @@ and unverified facts. Updated at each stage.
   `ZUZU_API_KEY` and `POSTGRES_PASSWORD` from `.env.example`, normalize
   `.env` to LF, and build/start the Docker Compose stack. `-Force` /
   `--force` regenerates secrets; `-SkipBuild` / `--skip-build` skips Docker.
+- Added `scripts/dev-setup.ps1`, `scripts/dev-setup.sh`, `scripts/dev.ps1`,
+  and `scripts/dev.sh` for host-based development with SQLite and the mock
+  provider, so Zuzu runs without Docker or an external database.
 - Added `tests/acceptance/test_setup_scripts.py`: verifies fresh install,
   idempotency, `--force` regeneration, and that secrets are not echoed.
 - Added browser-based first-run setup wizard at `/setup`: collects API base

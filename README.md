@@ -9,20 +9,30 @@
   deterministic offline mock for development and tests.
 - An **MCP client** (Streamable HTTP, verified live) for tool use with
   policy-gated permissions.
-- **PostgreSQL** persistence with Alembic migrations.
+- **SQLite** for local development and **PostgreSQL** for Docker/production
+  deployments, with Alembic migrations for both.
 
 Zuzu is completely independent of OpenClaw, AstraAI and any other assistant —
 see `docs/ARCHITECTURE.md#independence-statement` and the independence tests.
 
-## Quick start (offline, no credentials)
+## Quick start (host, no Docker)
+
+The fastest way to run locally. Uses SQLite and the mock AI provider, so no
+external database or API key is required.
 
 ```powershell
-python -m pip install -e ".[dev]"
-copy .env.example .env          # defaults: mock provider, SQLite, MCP off
+# Windows
+scripts\dev-setup.ps1          # installs deps, creates .env
 scripts\dev.ps1                 # migrations + API on http://127.0.0.1:8000
 ```
 
-Frontend:
+```bash
+# Linux / macOS / WSL
+bash scripts/dev-setup.sh
+bash scripts/dev.sh
+```
+
+Frontend (in a second terminal):
 
 ```powershell
 cd apps\web
@@ -30,25 +40,49 @@ npm install
 npm run dev                     # http://localhost:3000
 ```
 
-Set the API key in the web header (any value in dev mode without a key; when
-`ZUZU_API_KEY` is set, use that).
+The first-run wizard at `/setup` lets you confirm the API URL. In dev mode,
+authentication is optional unless `ZUZU_API_KEY` is set in `.env`.
 
-## Full stack with Docker
+## Full stack with Docker (production-like)
 
 ```powershell
-# One-time setup: creates .env with generated secrets and starts the stack.
-scripts\setup.ps1
+# Windows
+scripts\setup.ps1               # creates .env, builds images, starts stack
 
-# Or manually:
+# Linux / macOS / WSL
+bash scripts/setup.sh
+```
+
+Or manually:
+
+```powershell
 copy .env.example .env          # set ZUZU_API_KEY, POSTGRES_PASSWORD, NVIDIA_API_KEY
 docker compose up -d --build
 ```
 
 `compose.yaml` loads environment variables directly from `.env` so secrets
-are not subject to Docker Compose interpolation. On first visit, the web UI
-shows a link to `/setup` where you can enter the API URL and key. For
-Tailscale-only deployments, set `ZUZU_CORS_ORIGINS` in `.env` to include the
-Tailscale origin before running `docker compose up`.
+are not subject to Docker Compose interpolation. The setup scripts rewrite
+`DATABASE_URL` to point at the Docker Postgres service and set
+`AI_PROVIDER=nvidia`. For Tailscale-only deployments, set `ZUZU_CORS_ORIGINS`
+in `.env` to include the Tailscale origin before running `docker compose up`.
+
+## Switching from mock to live NVIDIA chat
+
+Edit `.env` after the host setup:
+
+```dotenv
+AI_PROVIDER=nvidia
+NVIDIA_API_KEY=nvapi-...
+NVIDIA_MODEL=nvidia/nemotron-3.5-lightning-30b-a3b
+```
+
+Restart the API (`scripts\dev.ps1` / `scripts/dev.sh`). v0.1.0 was verified
+live with `nvidia/nemotron-3.5-lightning-30b-a3b`. The earlier default
+`meta/llama-3.3-70b-instruct` is end-of-life (HTTP 410).
+
+If the API key can list models (`GET /v1/models` returns 200) but inference
+returns HTTP 403, the key is missing the **Public API Endpoints** entitlement;
+contact NVIDIA support to enable it.
 
 ## Tests & checks
 
@@ -59,25 +93,6 @@ python -m mypy apps/api/src
 cd apps\web; npm test           # frontend unit tests
 cd apps\web; npm run build      # frontend build
 ```
-
-## Live NVIDIA chat
-
-Set `NVIDIA_API_KEY` (and optionally `NVIDIA_MODEL`) in `.env` with
-`AI_PROVIDER=nvidia`, restart, and chat.
-
-```dotenv
-AI_PROVIDER=nvidia
-NVIDIA_API_KEY=nvapi-...
-NVIDIA_MODEL=nvidia/nemotron-3.5-lightning-30b-a3b
-```
-
-`NVIDIA_MODEL` overrides the default. v0.1.0 was verified live with
-`nvidia/nemotron-3.5-lightning-30b-a3b`. The earlier default
-`meta/llama-3.3-70b-instruct` is end-of-life (HTTP 410).
-
-If the API key can list models (`GET /v1/models` returns 200) but inference
-returns HTTP 403, the key is missing the **Public API Endpoints** entitlement;
-contact NVIDIA support to enable it.
 
 ## MCP integration
 
