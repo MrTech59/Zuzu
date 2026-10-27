@@ -110,7 +110,7 @@ class Settings(BaseSettings):
 
     @property
     def resolved_nvidia_model(self) -> str:
-        return self.nvidia_model or "meta/llama-3.3-70b-instruct"
+        return self.nvidia_model or "nvidia/nemotron-3.5-lightning-30b-a3b"
 
     def assert_runnable(self) -> None:
         """Refuse to serve protected API surface without authentication in prod."""

@@ -135,18 +135,25 @@ and unverified facts. Updated at each stage.
 - The host environment has `NVIDIA_API_KEY` set, so the provider was not
   blocked by a missing key.
 - `GET https://integrate.api.nvidia.com/v1/models` with the configured key
-  returns HTTP 200 and lists models, confirming the key is valid.
+  returns HTTP 200 and lists models, confirming the key is valid and has the
+  **Public API Endpoints** entitlement.
 - `POST /v1/chat/completions` with the candidate model
-  `nvidia/nemotron-3.5-lightning-30b-a3b` returns **HTTP 403 Forbidden**.
-- This is consistent with NVIDIA's documented behavior: the API key lacks the
-  **Public API Endpoints** entitlement. `GET /v1/models` succeeds while
-  inference requests fail with 403 until NVIDIA support enables the scope.
-- Previous default model `meta/llama-3.3-70b-instruct` returns **HTTP 410 Gone**
-  (EOL 2026-08-26).
-- **Status: blocked by provider-side account entitlement, not by code or
-  model identifier.** The model ID is correct per the NVIDIA catalog and API
-  reference docs. A key with the Public API Endpoints scope is required to
-  complete live verification.
+  `nvidia/nemotron-3.5-lightning-30b-a3b` returns **HTTP 200**. The model
+  emits reasoning tokens before content, so a sufficient `max_tokens` value
+  is required; Zuzu's chat endpoint uses `max_tokens=2048`, which is enough.
+- The end-to-end API test `POST /api/v1/chat` succeeded with a non-empty
+  assistant response (`"content": "Hello"`) at 2026-10-27T21:53:17Z.
+- The default model `meta/llama-3.3-70b-instruct` returns **HTTP 410 Gone**
+  (EOL 2026-08-26), so `nvidia/nemotron-3.5-lightning-30b-a3b` is the
+  verified default for v0.1.0.
+
+### Docker Compose environment fix
+- Switched `compose.yaml` from inline `${VAR}` interpolation to `env_file: .env`
+  for the `api` and `db` services. This prevents Docker Compose from mangling
+  secret values that contain shell-special characters (e.g. `$`) and ensures
+  the NVIDIA key is passed to the container exactly as written in `.env`.
+- The web service keeps an explicit `ZUZU_API_URL` override while also loading
+  the rest of its environment from `.env`.
 
 ### Linux setup workflow verification
 - Ran `scripts/setup.sh --skip-build` inside WSL2 (Ubuntu) from a clean copy
@@ -198,13 +205,9 @@ and unverified facts. Updated at each stage.
 
 ## Blockers / unverified items
 
-1. **NVIDIA live chat** — blocked by the provider-side account entitlement
-   **Public API Endpoints**. The configured key can list models (HTTP 200) but
-   gets HTTP 403 on `POST /v1/chat/completions` for the correct model ID
-   `nvidia/nemotron-3.5-lightning-30b-a3b`. The default model
-   `meta/llama-3.3-70b-instruct` is EOL (HTTP 410). The code adapter is
-   implemented and tested; live inference requires a key with the proper
-   scope enabled by NVIDIA support.
+1. **None remaining for v0.1.0.** NVIDIA live chat is verified end-to-end with
+   `nvidia/nemotron-3.5-lightning-30b-a3b`. PostgreSQL migrations, persistence,
+   backup/restore, security tests, and Playwright e2e all pass.
 2. **Live MCP verification** — MCP remains disabled in `.env`
    (`ZUZU_MCP_ENABLED=false`). Previous sessions verified the live MCP
    server; this session did not re-run live MCP tests.
@@ -218,11 +221,9 @@ and unverified facts. Updated at each stage.
 - Backup/restore verified against Postgres.
 - Setup scripts, first-run wizard, and acceptance tests are implemented.
 - Linux setup workflow verified in WSL2; CI covers Ubuntu and Windows.
-- **Remaining before tagging v0.1.0**: the NVIDIA live-chat verification is
-  blocked by the **Public API Endpoints** entitlement on the configured key.
-  Once NVIDIA support enables that scope, rerun the live chat test and
-  update this note. Otherwise the release is code-ready and fully verified
-  offline.
+- NVIDIA live chat verified end-to-end through the API with
+  `nvidia/nemotron-3.5-lightning-30b-a3b`.
+- **Ready for v0.1.0 tag once you explicitly approve.**
 
 ## Independence verification
 

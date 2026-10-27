@@ -3,11 +3,10 @@ name: zuzu
 services:
   db:
     image: postgres:16-alpine
+    env_file: .env
     environment:
       POSTGRES_DB: zuzu
       POSTGRES_USER: zuzu
-      # In production, override via .env (never use the example password).
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-locally}
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
@@ -23,17 +22,7 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
-    environment:
-      APP_ENV: ${APP_ENV:-development}
-      ZUZU_API_KEY: ${ZUZU_API_KEY:?set ZUZU_API_KEY in .env}
-      NVIDIA_API_KEY: ${NVIDIA_API_KEY:-}
-      NVIDIA_BASE_URL: ${NVIDIA_BASE_URL:-https://integrate.api.nvidia.com/v1}
-      NVIDIA_MODEL: ${NVIDIA_MODEL:-}
-      AI_PROVIDER: ${AI_PROVIDER:-nvidia}
-      DATABASE_URL: postgresql+psycopg://zuzu:${POSTGRES_PASSWORD:-change-me-locally}@db:5432/zuzu
-      ZUZU_MCP_ENABLED: ${ZUZU_MCP_ENABLED:-false}
-      ZUZU_MCP_SERVER_URL: ${ZUZU_MCP_SERVER_URL:-}
-      ZUZU_MCP_TRANSPORT: ${ZUZU_MCP_TRANSPORT:-streamable-http}
+    env_file: .env
     depends_on:
       db:
         condition: service_healthy
@@ -52,9 +41,10 @@ services:
     build:
       context: apps/web
       dockerfile: Dockerfile
+    env_file: .env
     environment:
+      # Internal compose hostname; the browser still calls localhost:8000.
       ZUZU_API_URL: http://api:8000/api/v1
-      ZUZU_API_KEY: ${ZUZU_API_KEY:-}
     depends_on:
       api:
         condition: service_healthy

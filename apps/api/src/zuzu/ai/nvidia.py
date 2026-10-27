@@ -42,7 +42,7 @@ class NvidiaProvider(ChatProvider):
         *,
         api_key: str,
         base_url: str = "https://integrate.api.nvidia.com/v1",
-        default_model: str = "meta/llama-3.3-70b-instruct",
+        default_model: str = "nvidia/nemotron-3.5-lightning-30b-a3b",
         timeout_seconds: float = 60.0,
         connect_timeout_seconds: float = 10.0,
         max_retries: int = 2,

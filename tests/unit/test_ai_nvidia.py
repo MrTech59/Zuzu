@@ -58,7 +58,7 @@ async def test_complete_success() -> None:
     assert resp.provider == "nvidia"
     assert seen["url"].startswith("https://integrate.api.nvidia.com/v1/chat/completions")
     assert seen["auth"] == f"Bearer {KEY}"
-    assert seen["payload"]["model"] == "meta/llama-3.3-70b-instruct"
+    assert seen["payload"]["model"] == "nvidia/nemotron-3.5-lightning-30b-a3b"
 
 
 @pytest.mark.asyncio
