@@ -1,10 +1,23 @@
 #!/usr/bin/env bash
-# Install Zuzu API and web UI as systemd services.
+# Install or update Zuzu API and web UI as systemd services.
 # Run as root (or with sudo).
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_ROOT"
+
+UPDATE=false
+for arg in "$@"; do
+    case "$arg" in
+        --update) UPDATE=true ;;
+        --help)
+            echo "Usage: $0 [--update]"
+            echo ""
+            echo "  --update  Pull the latest code, rebuild, and restart the services."
+            exit 0
+            ;;
+    esac
+done
 
 if [[ "$EUID" -ne 0 ]]; then
     echo "ERROR: This script must be run as root (or with sudo)." >&2
@@ -33,39 +46,68 @@ if [[ ! -f "$PROJECT_ROOT/.env" ]]; then
     exit 1
 fi
 
-echo "Building web production bundle..."
-(cd "$PROJECT_ROOT/apps/web" && "$NPM_BIN" run build)
+install_units() {
+    echo "Installing systemd units..."
+    mkdir -p /etc/systemd/system
+    for service in api web; do
+        sed \
+            -e "s|{{REPO_PATH}}|$PROJECT_ROOT|g" \
+            -e "s|{{USER}}|$SERVICE_USER|g" \
+            -e "s|{{PYTHON}}|$PYTHON_BIN|g" \
+            -e "s|{{NPM}}|$NPM_BIN|g" \
+            "$PROJECT_ROOT/scripts/services/zuzu-${service}.service.template" \
+            > "/etc/systemd/system/zuzu-${service}.service"
+    done
+    systemctl daemon-reload
+    systemctl enable zuzu-api.service zuzu-web.service
+}
 
-echo "Installing systemd units..."
-mkdir -p /etc/systemd/system
-for service in api web; do
-    sed \
-        -e "s|{{REPO_PATH}}|$PROJECT_ROOT|g" \
-        -e "s|{{USER}}|$SERVICE_USER|g" \
-        -e "s|{{PYTHON}}|$PYTHON_BIN|g" \
-        -e "s|{{NPM}}|$NPM_BIN|g" \
-        "$PROJECT_ROOT/scripts/services/zuzu-${service}.service.template" \
-        > "/etc/systemd/system/zuzu-${service}.service"
-done
+build_web() {
+    echo "Installing Python dependencies..."
+    "$PYTHON_BIN" -m pip install -e ".[dev]"
 
-systemctl daemon-reload
-systemctl enable zuzu-api.service zuzu-web.service
+    echo "Building web production bundle..."
+    (cd "$PROJECT_ROOT/apps/web" && "$NPM_BIN" install && "$NPM_BIN" run build)
+}
 
-echo "Starting services..."
-systemctl start zuzu-api.service
+start_services() {
+    echo "Starting services..."
+    systemctl start zuzu-api.service
 
-# Wait for API health before starting the web UI.
-for i in {1..30}; do
-    if curl -sf http://127.0.0.1:8000/api/v1/health >/dev/null 2>&1; then
-        break
-    fi
-    sleep 1
-done
+    # Wait for API health before starting the web UI.
+    for i in {1..30}; do
+        if curl -sf http://127.0.0.1:8000/api/v1/health >/dev/null 2>&1; then
+            break
+        fi
+        sleep 1
+    done
 
-systemctl start zuzu-web.service
+    systemctl start zuzu-web.service
+}
 
-echo ""
-echo "Services installed and started."
+if [[ "$UPDATE" == true ]]; then
+    echo "Updating Zuzu services..."
+    systemctl stop zuzu-api.service zuzu-web.service || true
+
+    echo "Pulling latest code..."
+    git config --global --add safe.directory "$PROJECT_ROOT" 2>/dev/null || true
+    git -C "$PROJECT_ROOT" pull origin main
+
+    build_web
+    install_units
+    start_services
+
+    echo ""
+    echo "Update complete."
+else
+    build_web
+    install_units
+    start_services
+
+    echo ""
+    echo "Services installed and started."
+fi
+
 echo ""
 systemctl status zuzu-api.service --no-pager
 systemctl status zuzu-web.service --no-pager

@@ -125,6 +125,12 @@ from the local network.
 Use `systemctl status zuzu-api` / `systemctl status zuzu-web` and
 `journalctl -u zuzu-api -f` / `journalctl -u zuzu-web -f` to manage them.
 
+To update to the latest code and restart the services:
+
+```bash
+bash scripts/install-services.sh --update
+```
+
 `compose.yaml` loads environment variables directly from `.env` so secrets
 are not subject to Docker Compose interpolation. The setup scripts rewrite
 `DATABASE_URL` to point at the Docker Postgres service and set

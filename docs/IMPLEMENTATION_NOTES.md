@@ -174,7 +174,8 @@ and unverified facts. Updated at each stage.
 - Added `scripts/services/zuzu-api.service.template`,
   `scripts/services/zuzu-web.service.template`, and
   `scripts/install-services.sh` to install the API and web UI as systemd
-  services on Linux.
+  services on Linux. `install-services.sh --update` pulls the latest code,
+  rebuilds, and restarts the services.
 - Docker Compose remains a first-class alternative: `scripts/setup.ps1` and
   `scripts/setup.sh` rewrite `.env` to use PostgreSQL (`@db:5432`) and
   `AI_PROVIDER=nvidia` when generating the production-like stack.
