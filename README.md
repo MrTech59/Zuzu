@@ -38,12 +38,15 @@ Optional, depending on the path you choose:
 
 Zuzu uses cloud AI providers, so no GPU is required locally.
 
-| Setup | Minimum RAM | Recommended RAM | Minimum free storage | Recommended free storage |
-|-------|-------------|-----------------|----------------------|--------------------------|
-| Host dev (SQLite, no Docker) | 2 GB | 4 GB | 2 GB | 4 GB |
-| Docker Compose stack (API + web + PostgreSQL) | 4 GB | 8 GB | 4 GB | 8 GB |
+| Setup | Min CPU cores | Rec. CPU cores | Min RAM | Rec. RAM | Min storage | Rec. storage |
+|-------|---------------|----------------|---------|----------|-------------|--------------|
+| Host dev (SQLite, no Docker) | 2 | 4 | 2 GB | 4 GB | 2 GB | 4 GB |
+| Docker Compose stack (API + web + PostgreSQL) | 4 | 8 | 4 GB | 8 GB | 4 GB | 8 GB |
 
 Notes:
+- **CPU**: the Next.js frontend build and Docker image builds are the most
+  CPU-intensive steps. Runtime usage is modest; 2 cores is enough for host
+  development, and 4 cores handles the Docker stack comfortably.
 - **RAM**: the Docker Compose stack runs three containers simultaneously
   (API, Next.js web UI, PostgreSQL). Docker Desktop on Windows/WSL adds its
   own memory overhead; 8 GB is much more comfortable.
@@ -51,7 +54,7 @@ Notes:
   Python packages. The actual application data (SQLite/Postgres) starts at
   only a few megabytes.
 - These numbers assume you are **not** running a local LLM. If you add local
-  inference later, GPU and RAM requirements are determined by that model.
+  inference later, GPU, CPU, and RAM requirements are determined by that model.
 
 ## Quick start (host, no Docker)
 
