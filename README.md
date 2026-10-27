@@ -62,16 +62,18 @@ Run the unified install script and choose **host** (SQLite + mock AI, no
 Docker) or **Docker Compose** (PostgreSQL + NVIDIA live-chat ready):
 
 ```powershell
-# Windows
+# Windows (run as Administrator to let the script install Python/Node)
 scripts\install.ps1
 ```
 
 ```bash
-# Linux / macOS / WSL
+# Linux / macOS / WSL (run as root on Debian/Ubuntu to install Python/Node)
 bash scripts/install.sh
 ```
 
-The script will ask which path you want. Non-interactive equivalents:
+The script will ask which path you want. It can also install Python 3.12 and
+Node.js for you when it is run with the necessary privileges. Non-interactive
+usage:
 
 ```powershell
 scripts\install.ps1 -UseHost     # or -UseDocker
