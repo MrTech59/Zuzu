@@ -226,6 +226,7 @@ and unverified facts. Updated at each stage.
 - Added `scripts/install.ps1` and `scripts/install.sh` as unified entry
   points that ask whether to install the host development environment or
   the Docker Compose stack, then delegate to the appropriate setup script.
+  On Linux, the host path also installs systemd services by default.
 - Added `tests/acceptance/test_setup_scripts.py`: verifies fresh install,
   idempotency, `--force` regeneration, and that secrets are not echoed.
 - Added browser-based first-run setup wizard at `/setup`: collects API base

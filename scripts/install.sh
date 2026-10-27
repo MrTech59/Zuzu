@@ -21,6 +21,7 @@ USE_DOCKER=false
 USE_HOST=false
 SKIP_BUILD=false
 UPDATE=false
+INSTALL_SERVICES=true
 
 for arg in "$@"; do
     case "$arg" in
@@ -28,13 +29,15 @@ for arg in "$@"; do
         --host) USE_HOST=true ;;
         --skip-build) SKIP_BUILD=true ;;
         --update) UPDATE=true ;;
+        --no-services) INSTALL_SERVICES=false ;;
         --help)
-            echo "Usage: $0 [--host|--docker] [--skip-build] [--update]"
+            echo "Usage: $0 [--host|--docker] [--skip-build] [--update] [--no-services]"
             echo ""
-            echo "  --host        Install the host development environment."
-            echo "  --docker      Install the Docker Compose stack."
-            echo "  --skip-build  Skip Docker image build (Docker path only)."
-            echo "  --update      Pull the latest code before installing/updating."
+            echo "  --host         Install the host development environment."
+            echo "  --docker       Install the Docker Compose stack."
+            echo "  --skip-build   Skip Docker image build (Docker path only)."
+            echo "  --update       Pull the latest code before installing/updating."
+            echo "  --no-services  Skip systemd service install (host path only)."
             exit 0
             ;;
     esac
@@ -162,4 +165,18 @@ else
     fi
     echo "Running host development setup..."
     bash "$PROJECT_ROOT/scripts/dev-setup.sh"
+
+    if [[ "$INSTALL_SERVICES" == true ]]; then
+        if command -v systemctl >/dev/null 2>&1 && [[ "$EUID" -eq 0 ]]; then
+            echo ""
+            echo "Installing Zuzu as systemd services..."
+            bash "$PROJECT_ROOT/scripts/install-services.sh"
+        else
+            echo ""
+            echo "systemd is not available or this script is not running as root."
+            echo "Skipping service install. Start manually with:"
+            echo "  scripts/dev.sh"
+            echo "  cd apps/web && npm run dev"
+        fi
+    fi
 fi

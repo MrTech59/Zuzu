@@ -61,25 +61,29 @@ Notes:
 Run the unified install script and choose **host** (SQLite + mock AI, no
 Docker) or **Docker Compose** (PostgreSQL + NVIDIA live-chat ready):
 
-```powershell
-# Windows (run as Administrator to let the script install Python/Node)
-scripts\install.ps1
+```bash
+# Linux / macOS / WSL (run as root on Debian/Ubuntu)
+bash scripts/install.sh
 ```
 
-```bash
-# Linux / macOS / WSL (run as root on Debian/Ubuntu to install Python/Node)
-bash scripts/install.sh
+The host path will install dependencies **and** set up systemd services by
+default, so Zuzu starts automatically and stays running. To skip the service
+install and run dev servers manually, use `--no-services`.
+
+```powershell
+# Windows (run as Administrator)
+scripts\install.ps1
 ```
 
 The script will ask which path you want. It can also install Python 3.12 and
 Node.js for you when it is run with the necessary privileges. Non-interactive
 usage:
 
-```powershell
-scripts\install.ps1 -UseHost        # or -UseDocker
-scripts\install.ps1 -Update -UseHost # pull latest and reinstall
-bash scripts/install.sh --host       # or --docker
-bash scripts/install.sh --update --host # pull latest and reinstall
+```bash
+bash scripts/install.sh --host                 # host + services
+bash scripts/install.sh --host --no-services   # host only, no systemd
+bash scripts/install.sh --docker               # Docker Compose
+bash scripts/install.sh --update --host        # pull latest and reinstall
 ```
 
 Then start the web dev server in a second terminal:
