@@ -134,14 +134,27 @@ and unverified facts. Updated at each stage.
 ### NVIDIA live-chat smoke test
 - The host environment has `NVIDIA_API_KEY` set, so the provider was not
   blocked by a missing key.
-- The default model `meta/llama-3.3-70b-instruct` returns **HTTP 410 Gone**
-  from `integrate.api.nvidia.com` (end-of-life as of 2026-08-26).
-- Tested alternative model strings (`meta/llama-3.1-8b-instruct`,
-  `meta/llama-3.1-70b-instruct`, `nvidia/nemotron-4-340b-instruct`,
-  several prefix variants): all returned 410, 403, 404, or auth errors.
-- **Status: blocked by provider-side model deprecation / key authorization.**
-  The adapter itself is implemented and unit-tested; a working model name
-  is required to complete live verification. No key was printed.
+- `GET https://integrate.api.nvidia.com/v1/models` with the configured key
+  returns HTTP 200 and lists models, confirming the key is valid.
+- `POST /v1/chat/completions` with the candidate model
+  `nvidia/nemotron-3.5-lightning-30b-a3b` returns **HTTP 403 Forbidden**.
+- This is consistent with NVIDIA's documented behavior: the API key lacks the
+  **Public API Endpoints** entitlement. `GET /v1/models` succeeds while
+  inference requests fail with 403 until NVIDIA support enables the scope.
+- Previous default model `meta/llama-3.3-70b-instruct` returns **HTTP 410 Gone**
+  (EOL 2026-08-26).
+- **Status: blocked by provider-side account entitlement, not by code or
+  model identifier.** The model ID is correct per the NVIDIA catalog and API
+  reference docs. A key with the Public API Endpoints scope is required to
+  complete live verification.
+
+### Linux setup workflow verification
+- Ran `scripts/setup.sh --skip-build` inside WSL2 (Ubuntu) from a clean copy
+  of the repository.
+- Result: script executed successfully, generated `.env`, populated
+  `ZUZU_API_KEY` and `POSTGRES_PASSWORD`, and produced LF line endings.
+- The CI workflow also runs the same script path on `ubuntu-latest`, so both
+  local WSL and GitHub Actions Linux paths are covered.
 
 ### Security review
 - Auth dependency uses constant-time `hmac.compare_digest`; only
@@ -185,9 +198,13 @@ and unverified facts. Updated at each stage.
 
 ## Blockers / unverified items
 
-1. **NVIDIA live chat** — blocked by provider-side model deprecation and/or
-   key authorization. A current, accessible model name is needed. Mock
-   provider covers offline use.
+1. **NVIDIA live chat** — blocked by the provider-side account entitlement
+   **Public API Endpoints**. The configured key can list models (HTTP 200) but
+   gets HTTP 403 on `POST /v1/chat/completions` for the correct model ID
+   `nvidia/nemotron-3.5-lightning-30b-a3b`. The default model
+   `meta/llama-3.3-70b-instruct` is EOL (HTTP 410). The code adapter is
+   implemented and tested; live inference requires a key with the proper
+   scope enabled by NVIDIA support.
 2. **Live MCP verification** — MCP remains disabled in `.env`
    (`ZUZU_MCP_ENABLED=false`). Previous sessions verified the live MCP
    server; this session did not re-run live MCP tests.
@@ -200,8 +217,12 @@ and unverified facts. Updated at each stage.
 - Backend lint/format/type-check/test suites pass.
 - Backup/restore verified against Postgres.
 - Setup scripts, first-run wizard, and acceptance tests are implemented.
-- **Remaining before tagging v0.1.0**: resolve or document the NVIDIA model
-  deprecation blocker; otherwise ready.
+- Linux setup workflow verified in WSL2; CI covers Ubuntu and Windows.
+- **Remaining before tagging v0.1.0**: the NVIDIA live-chat verification is
+  blocked by the **Public API Endpoints** entitlement on the configured key.
+  Once NVIDIA support enables that scope, rerun the live chat test and
+  update this note. Otherwise the release is code-ready and fully verified
+  offline.
 
 ## Independence verification
 

@@ -63,6 +63,17 @@ cd apps\web; npm run build      # frontend build
 Set `NVIDIA_API_KEY` (and optionally `NVIDIA_MODEL`) in `.env` with
 `AI_PROVIDER=nvidia`, restart, and chat.
 
+```dotenv
+AI_PROVIDER=nvidia
+NVIDIA_API_KEY=nvapi-...
+NVIDIA_MODEL=nvidia/nemotron-3.5-lightning-30b-a3b
+```
+
+`NVIDIA_MODEL` overrides the default (`meta/llama-3.3-70b-instruct`). If the
+API key returns HTTP 403 on `POST /v1/chat/completions` while
+`GET /v1/models` succeeds, the key is missing the **Public API Endpoints**
+entitlement; contact NVIDIA support to enable it.
+
 ## MCP integration
 
 Verified against the live browser MCP server (Streamable HTTP). Enable with:
