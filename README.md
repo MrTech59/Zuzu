@@ -56,49 +56,49 @@ Notes:
 - These numbers assume you are **not** running a local LLM. If you add local
   inference later, GPU, CPU, and RAM requirements are determined by that model.
 
-## Quick start (host, no Docker)
+## Quick start
 
-The fastest way to run locally. Uses SQLite and the mock AI provider, so no
-external database or API key is required.
+Run the unified install script and choose **host** (SQLite + mock AI, no
+Docker) or **Docker Compose** (PostgreSQL + NVIDIA live-chat ready):
 
 ```powershell
 # Windows
-scripts\dev-setup.ps1          # installs deps, creates .env
-scripts\dev.ps1                 # migrations + API on http://127.0.0.1:8000
+scripts\install.ps1
 ```
 
 ```bash
 # Linux / macOS / WSL
-bash scripts/dev-setup.sh
-bash scripts/dev.sh
+bash scripts/install.sh
 ```
 
-Frontend (in a second terminal):
+The script will ask which path you want. Non-interactive equivalents:
+
+```powershell
+scripts\install.ps1 -UseHost     # or -UseDocker
+bash scripts/install.sh --host # or --docker
+```
+
+Then start the web dev server in a second terminal:
 
 ```powershell
 cd apps\web
-npm install
 npm run dev                     # http://localhost:3000
 ```
 
 The first-run wizard at `/setup` lets you confirm the API URL. In dev mode,
 authentication is optional unless `ZUZU_API_KEY` is set in `.env`.
 
-## Full stack with Docker (production-like)
+## Manual paths
+
+If you prefer to run the underlying scripts directly:
 
 ```powershell
-# Windows
-scripts\setup.ps1               # creates .env, builds images, starts stack
+# Host development (SQLite + mock provider)
+scripts\dev-setup.ps1
+scripts\dev.ps1
 
-# Linux / macOS / WSL
-bash scripts/setup.sh
-```
-
-Or manually:
-
-```powershell
-copy .env.example .env          # set ZUZU_API_KEY, POSTGRES_PASSWORD, NVIDIA_API_KEY
-docker compose up -d --build
+# Docker Compose (PostgreSQL + NVIDIA live-chat ready)
+scripts\setup.ps1
 ```
 
 `compose.yaml` loads environment variables directly from `.env` so secrets

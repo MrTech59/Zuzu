@@ -212,6 +212,9 @@ and unverified facts. Updated at each stage.
 - Added `scripts/dev-setup.ps1`, `scripts/dev-setup.sh`, `scripts/dev.ps1`,
   and `scripts/dev.sh` for host-based development with SQLite and the mock
   provider, so Zuzu runs without Docker or an external database.
+- Added `scripts/install.ps1` and `scripts/install.sh` as unified entry
+  points that ask whether to install the host development environment or
+  the Docker Compose stack, then delegate to the appropriate setup script.
 - Added `tests/acceptance/test_setup_scripts.py`: verifies fresh install,
   idempotency, `--force` regeneration, and that secrets are not echoed.
 - Added browser-based first-run setup wizard at `/setup`: collects API base
