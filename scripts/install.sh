@@ -75,7 +75,8 @@ install_prereqs() {
         echo "Ubuntu/Debian example:" >&2
         echo "  sudo add-apt-repository ppa:deadsnakes/ppa" >&2
         echo "  sudo apt update" >&2
-        echo "  sudo apt install python3.12 python3.12-venv python3.12-pip curl ca-certificates gnupg" >&2
+        echo "  sudo apt install python3.12 python3.12-venv curl ca-certificates gnupg" >&2
+        echo "  sudo python3.12 -m ensurepip --upgrade" >&2
         echo "  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -" >&2
         echo "  sudo apt install -y nodejs" >&2
         exit 1
@@ -99,7 +100,8 @@ install_prereqs() {
             fi
         fi
 
-        apt-get install -y -qq python3.12 python3.12-venv python3.12-pip
+        apt-get install -y -qq python3.12 python3.12-venv
+        python3.12 -m ensurepip --upgrade
 
         NODE_MAJOR=22
         mkdir -p /etc/apt/keyrings
