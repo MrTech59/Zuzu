@@ -114,17 +114,94 @@ and unverified facts. Updated at each stage.
 - Formatting, linting, typecheck, full test suite — see report in the final
   session summary; README with run instructions; release checklist below.
 
+## v0.1.0 release prep verification (2026-10-27)
+
+### PostgreSQL-backed integration
+- Ran `docker compose exec api sh -c 'alembic downgrade base && alembic upgrade head'`
+  against the Compose Postgres database: completed successfully.
+- Created a memory via `POST /api/v1/memories`, restarted the `api` container,
+  and confirmed the memory was still present via `GET /api/v1/memories`.
+- `GET /api/v1/ready` (authenticated) returns `{"ready":true,"checks":{"database":"ok","mcp":"disabled"}}`.
+
+### Playwright end-to-end tests
+- Installed Chromium with `npx playwright install --with-deps chromium`.
+- Ran `npx playwright test` against the running Compose stack.
+- Result: **5 passed** (chat round trip, tasks page, approvals page,
+  memories create/delete, first-run setup wizard).
+- Fixed `playwright.config.ts` to trim `ZUZU_API_KEY` so CRLF in `.env`
+  cannot produce an invalid Authorization header.
+
+### NVIDIA live-chat smoke test
+- The host environment has `NVIDIA_API_KEY` set, so the provider was not
+  blocked by a missing key.
+- The default model `meta/llama-3.3-70b-instruct` returns **HTTP 410 Gone**
+  from `integrate.api.nvidia.com` (end-of-life as of 2026-08-26).
+- Tested alternative model strings (`meta/llama-3.1-8b-instruct`,
+  `meta/llama-3.1-70b-instruct`, `nvidia/nemotron-4-340b-instruct`,
+  several prefix variants): all returned 410, 403, 404, or auth errors.
+- **Status: blocked by provider-side model deprecation / key authorization.**
+  The adapter itself is implemented and unit-tested; a working model name
+  is required to complete live verification. No key was printed.
+
+### Security review
+- Auth dependency uses constant-time `hmac.compare_digest`; only
+  `/api/v1/health` is public.
+- CORS origins were hardcoded to `localhost:3000`; made them configurable
+  via `ZUZU_CORS_ORIGINS` (`apps/api/src/zuzu/config.py` and `main.py`).
+- Added regression tests for default CORS origins and configurable origins.
+- Approval binding, expiry, single-use consumption, and changed-action
+  rejection were already covered by existing tests.
+- Audit redaction tests already verify sensitive keys and bearer-like
+  strings are redacted.
+- Containers run as non-root `zuzu` user; no Docker socket or host DB port
+  is exposed.
+
+### Backup / restore
+- Created a backup with `docker compose exec db pg_dump -U zuzu -d zuzu -Fc -f /tmp/zuzu-test.dump`
+  (17.2 KB).
+- Restored into a new `restoretest` database with `pg_restore` and verified
+  `memories` row count = 1. Dump format and restore procedure work.
+
+### Backend quality suites
+- `python -m ruff check apps/api/src tests migrations scripts` — passed.
+- `python -m ruff format --check apps/api/src tests migrations scripts` — passed.
+- `python -m mypy apps/api/src` — passed.
+- `python -m pytest tests -q` — passed (one skipped bash-only test on Windows).
+
+### Standalone architecture requirements
+- Added `scripts/setup.ps1` and `scripts/setup.sh`: idempotent, generate
+  `ZUZU_API_KEY` and `POSTGRES_PASSWORD` from `.env.example`, normalize
+  `.env` to LF, and build/start the Docker Compose stack. `-Force` /
+  `--force` regenerates secrets; `-SkipBuild` / `--skip-build` skips Docker.
+- Added `tests/acceptance/test_setup_scripts.py`: verifies fresh install,
+  idempotency, `--force` regeneration, and that secrets are not echoed.
+- Added browser-based first-run setup wizard at `/setup`: collects API base
+  URL and key, validates health/ready, stores values in `localStorage`, and
+  redirects to the chat page. The chat page links to the wizard when no key
+  is stored. The wizard shows an "already configured" state when a key
+  exists (wizard takeover protection).
+- Added `.github/workflows/ci.yml` for cross-platform lint/type/test on
+  Ubuntu and Windows, plus a Docker Compose smoke test on Ubuntu.
+
 ## Blockers / unverified items
 
-1. **NVIDIA live chat** — needs `NVIDIA_API_KEY`. Everything else works
-   offline via the mock provider.
-2. **Postgres-backed integration run** — the migration suite runs on SQLite;
-   the Postgres path is wired in compose and exercised manually when Docker
-   is available. Docker Desktop was started during this session; run
-   `docker compose up -d db && alembic upgrade head` with a real
-   `DATABASE_URL` to confirm on Postgres.
-3. **Frontend e2e (Playwright)** — config provided; browsers not installed
-   during this session (`npx playwright install` needed).
+1. **NVIDIA live chat** — blocked by provider-side model deprecation and/or
+   key authorization. A current, accessible model name is needed. Mock
+   provider covers offline use.
+2. **Live MCP verification** — MCP remains disabled in `.env`
+   (`ZUZU_MCP_ENABLED=false`). Previous sessions verified the live MCP
+   server; this session did not re-run live MCP tests.
+
+## Release readiness
+
+- Compose stack builds and starts cleanly on Windows.
+- API health/ready pass; Postgres migrations and persistence verified.
+- Playwright e2e suite passes against the running stack.
+- Backend lint/format/type-check/test suites pass.
+- Backup/restore verified against Postgres.
+- Setup scripts, first-run wizard, and acceptance tests are implemented.
+- **Remaining before tagging v0.1.0**: resolve or document the NVIDIA model
+  deprecation blocker; otherwise ready.
 
 ## Independence verification
 

@@ -27,6 +27,7 @@ node_modules/
 out/
 .turbo/
 coverage/
+*.tsbuildinfo
 
 # Playwright
 test-results/

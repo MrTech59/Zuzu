@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import {
   ApiError,
   getConversation,
@@ -142,7 +143,10 @@ export default function ChatPage() {
           {error && <div className="error-banner">{error}</div>}
           {!hasToken() && (
             <div className="error-banner">
-              Set the API key (top right) to talk to Zuzu.
+              <Link href="/setup" style={{ textDecoration: "underline" }}>
+                Run first-run setup
+              </Link>{" "}
+              to configure the API key.
             </div>
           )}
           <div className="messages" ref={scrollRef}>

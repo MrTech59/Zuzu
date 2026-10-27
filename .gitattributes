@@ -1,0 +1,5 @@
+# Shell scripts must keep LF line endings so they work on Linux/macOS.
+*.sh text eol=lf
+*.ps1 text eol=crlf
+# Environment template should be LF so setup scripts can process it cleanly.
+.env.example text eol=lf

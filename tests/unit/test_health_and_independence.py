@@ -49,7 +49,7 @@ async def test_api_rejects_when_no_key_configured_outside_dev(
     from zuzu.config import Settings, reset_settings_cache
 
     monkeypatch.setenv("APP_ENV", "production")
-    monkeypatch.delenv("ZUZU_API_KEY", raising=False)
+    monkeypatch.setenv("ZUZU_API_KEY", "")
     reset_settings_cache()
     with pytest.raises(RuntimeError, match="ZUZU_API_KEY"):
         Settings().assert_runnable()

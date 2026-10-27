@@ -88,3 +88,31 @@ async def test_prompt_injection_cannot_grant_permissions(
     assert detail["status"] in ("succeeded", "failed", "cancelled")
     for approval in detail["approvals"]:
         assert approval["action"] not in ("service_restart", "destructive_storage", "host_admin")
+
+
+def test_cors_origins_default_to_local_dev(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Default CORS origins support the local Next.js dev server."""
+    from zuzu.config import get_settings, reset_settings_cache
+
+    reset_settings_cache()
+    settings = get_settings()
+    assert "http://localhost:3000" in settings.cors_origins_list
+    assert "http://127.0.0.1:3000" in settings.cors_origins_list
+    reset_settings_cache()
+
+
+def test_cors_origins_are_configurable(monkeypatch: pytest.MonkeyPatch) -> None:
+    """ZUZU_CORS_ORIGINS is parsed into a list for the CORS middleware."""
+    from zuzu.config import get_settings, reset_settings_cache
+
+    monkeypatch.setenv(
+        "ZUZU_CORS_ORIGINS",
+        "https://zuzu.tailnet:3000, https://zuzu.example.com",
+    )
+    reset_settings_cache()
+    settings = get_settings()
+    assert settings.cors_origins_list == [
+        "https://zuzu.tailnet:3000",
+        "https://zuzu.example.com",
+    ]
+    reset_settings_cache()

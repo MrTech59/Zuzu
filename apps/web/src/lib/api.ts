@@ -4,14 +4,29 @@
  * Zuzu API client.
  *
  * - The API token lives in localStorage and is attached as a Bearer header.
+ * - The API base URL can be configured via localStorage (first-run wizard) or
+ *   the NEXT_PUBLIC_ZUZU_API_URL build-time environment variable.
  * - Provider/API errors are surfaced as typed ApiError, never swallowed.
  * - Streaming chat parses the backend's SSE format incrementally.
  */
 
-export const API_BASE: string =
-  process.env.NEXT_PUBLIC_ZUZU_API_URL || "http://127.0.0.1:8000/api/v1";
-
+const DEFAULT_API_BASE = "http://127.0.0.1:8000/api/v1";
 const TOKEN_STORAGE_KEY = "zuzu_api_key";
+const API_URL_STORAGE_KEY = "zuzu_api_url";
+
+export const API_BASE: string =
+  process.env.NEXT_PUBLIC_ZUZU_API_URL || DEFAULT_API_BASE;
+
+export function getApiBase(): string {
+  if (typeof localStorage === "undefined") return API_BASE;
+  return localStorage.getItem(API_URL_STORAGE_KEY) || API_BASE;
+}
+
+export function setApiBase(url: string): void {
+  if (typeof localStorage === "undefined") return;
+  if (url) localStorage.setItem(API_URL_STORAGE_KEY, url.replace(/\/$/, ""));
+  else localStorage.removeItem(API_URL_STORAGE_KEY);
+}
 
 export class ApiError extends Error {
   code: string;
@@ -56,7 +71,7 @@ export async function apiFetch<T>(
 
   let resp: Response;
   try {
-    resp = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    resp = await fetch(`${getApiBase()}${path}`, { ...options, headers });
   } catch (err) {
     throw new ApiError(
       "Could not reach the Zuzu API. Is the backend running?",
@@ -283,7 +298,7 @@ export async function streamChat(
 
   let resp: Response;
   try {
-    resp = await fetch(`${API_BASE}/chat`, {
+    resp = await fetch(`${getApiBase()}/chat`, {
       method: "POST",
       headers,
       body: JSON.stringify({

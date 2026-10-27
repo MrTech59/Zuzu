@@ -36,9 +36,17 @@ Set the API key in the web header (any value in dev mode without a key; when
 ## Full stack with Docker
 
 ```powershell
-copy .env.example .env          # set ZUZU_API_KEY (required), POSTGRES_PASSWORD
+# One-time setup: creates .env with generated secrets and starts the stack.
+scripts\setup.ps1
+
+# Or manually:
+copy .env.example .env          # set ZUZU_API_KEY, POSTGRES_PASSWORD
 docker compose up -d --build
 ```
+
+On first visit, the web UI shows a link to `/setup` where you can enter the
+API URL and key. For Tailscale-only deployments, set `ZUZU_CORS_ORIGINS` in
+`.env` to include the Tailscale origin before running `docker compose up`.
 
 ## Tests & checks
 

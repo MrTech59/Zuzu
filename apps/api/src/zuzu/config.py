@@ -66,7 +66,17 @@ class Settings(BaseSettings):
     task_timeout_seconds: int = Field(default=600, ge=5, le=36000)
     approval_ttl_seconds: int = Field(default=900, ge=5, le=86400)
 
-    # --- Chat limits ------------------------------------------------------------
+    # --- CORS -----------------------------------------------------------------
+    # Comma-separated list of web-frontend origins allowed to call the API.
+    cors_origins: str = Field(
+        default="http://localhost:3000,http://127.0.0.1:3000",
+        alias="ZUZU_CORS_ORIGINS",
+    )
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
     chat_max_message_chars: int = Field(default=32000, ge=1, le=1_000_000)
     chat_history_limit: int = Field(default=40, ge=1, le=200)
 
